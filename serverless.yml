@@ -16,6 +16,9 @@ functions:
           path: tasks
           method: get
           cors: true
+# this is a plugin we installed to test our API in an offline environment
+plugins:
+  - serverless-offline
 
 
 

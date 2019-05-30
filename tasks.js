@@ -1,31 +1,44 @@
-// Enter help for a list or the name of one of the first 10 James bond films 
-//(Goldfinger, Thunderball as examples.)
 
 
 const express = require("express")
 const serverless = require("serverless-http")
 
+const mysql=require("mysql")
+
 const app = express()
 
-app.get("/tasks", function (request, response) {
-  const title = request.query.title
-
-  var listOfTasks = [
-    {description: "Stop Dr No blowing up the world", Taskid:1, Completed: true, UserId:1},
-    {description: "Play golf with Goldfinger", Taskid:2, Completed: false, UserId:1},
-    {description: "Stop the Russians doing Russiany things",  Taskid:3, Completed: true, UserId:1},
-    {description: "Stop Mr Bigs drug cartel",  Taskid:4, Completed: true, UserId:1},
-    {description: "Stop Smersh from capturing our submarines", Taskid:5, Completed: false, UserId:1}
-  ]
-
-
-
-  response.json({
-    // message: `Title ${title} requested the task. ${returnData}`
-    tasks: listOfTasks
-  })
-
+const connection=mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  // host: "todoapplication.cfwgd2eitm3t.eu-west-2.rds.amazonaws.com",
+  // user:"root",
+  // password:"bradford1",
+  database:"todoapplication"
 })
+
+connection.connect()
+
+app.get("/tasks", function (request, response) {
+ 
+
+
+  connection.query("SELECT * FROM Tasks", function(err,result,fields) {
+ if (err!==null) {
+   console.log("error fetching tasks", err)
+   // respond with suitable response
+   response.send(500)
+ }
+    response.json({ tasks:result })
+  })
+})
+
+  // response.json({
+  //   // message: `Title ${title} requested the task. ${returnData}`
+  //   tasks: "test"
+  // })
+
+
 
 module.exports.handler = serverless(app)
 
