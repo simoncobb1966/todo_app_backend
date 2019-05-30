@@ -17,10 +17,12 @@ const connection=mysql.createConnection({
   database:"todoapplication"
 })
 
-connection.connect()
+//connection.connect()
+
+
 
 app.get("/tasks", function (request, response) {
- 
+// "/tasks" - is because the url has "/tasks" after the endpoint.
 
 
   connection.query("SELECT * FROM Tasks", function(err,result,fields) {
@@ -28,7 +30,7 @@ app.get("/tasks", function (request, response) {
    console.log("error fetching tasks", err)
    // respond with suitable response
    response.send(500)
- }
+ } else
     response.json({ tasks:result })
   })
 })
