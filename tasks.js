@@ -1,75 +1,81 @@
 const express = require("express")
 const serverless = require("serverless-http")
-const mysql=require("mysql")
+const mysql = require("mysql")
 const app = express()
-// const cors = require('cors')
+const cors = require('cors')
 
-//app.use(cors())
+app.use(cors())
 app.use(express.json())
 
 
-const connection=mysql.createConnection({
+const connection = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database:"todoapplication"
+  // *** LEAVE THIS. THIS IS THE DATABASE NOT THE TABLE ***
+  database: "todoapplication"
 })
 
 //connection.connect()
 
 
 //Create new tasks
-app.post("/tasks", function(request, response){
+app.post("/tasks", function (request, response) {
   const taskToBeSaved = request.body
-  connection.query('INSERT INTO Tasks SET?', taskToBeSaved, function (error, results, fields){
+  connection.query('INSERT INTO Tasks SET?', taskToBeSaved, function (error, results, fields) {
     if (error) {
-      console.log("Error saving new task",error)
+      console.log("Error saving new task", error)
       response.status(500).json({
         error: error
       })
     }
     else {
       response.json({
-        taskId: results.insertId})
+        taskId: results.insertId
+      })
     }
   })
 })
 
 
 //UPDATE tasks
-app.put("/tasks", function (request, response) {
-   const taskToBeUpdated = request.body
-  connection.query('UPDATE Tasks SET description = "'+taskToBeUpdated.description+'", completed = '+taskToBeUpdated.completed+', userid = '+taskToBeUpdated.userid+' WHERE taskid = '+taskToBeUpdated.taskid, function(err, result, fields) {
-    if (err!==null) {
+app.put("/tasks/:id", function (request, response) {
+  //  const customer = request.body
+  const id = request.params.id
+  // connection.query('UPDATE Tasks SET description = "'+taskToBeUpdated.description+'", done = '+taskToBeUpdated.completed+', userid = '+taskToBeUpdated.userid+' WHERE taskid = '+taskId, function(err, result, fields) {
+  connection.query('UPDATE Tasks SET done = 1 WHERE taskId = ' + id, function (err, result, fields) {
+    if (err !== null) {
       console.log("Something went wrong updating the task", err)
       response.send(500)
     } else {
-    response.send ("Item Updated")}
+      response.send("Item Updated")
+    }
   })
 })
 
 
 // Fetch tasks
 app.get("/tasks", function (request, response) {
-  connection.query("SELECT * FROM Tasks", function(err,result,fields) {
- if (err!==null) {
-   console.log("error fetching tasks", err)
-   response.send(500)
- } else
-    response.json({ tasks:result })
+  connection.query("SELECT * FROM Tasks", function (err, result, fields) {
+    if (err !== null) {
+      console.log("error fetching tasks", err)
+      response.send(500)
+    } else
+      response.json({ tasks: result })
   })
 })
 
 
 //Delete tasks
 app.delete("/tasks/:id", function (request, response) {
-  const taskId=request.params.id
-  connection.query("DELETE FROM Tasks WHERE TaskId = ?", [taskId], function(err, result, fields) {
-    if (err!==null) {
+  const id = request.params.id
+  connection.query("DELETE FROM Tasks WHERE taskId = ?", [id], function (err, result, fields) {
+    if (err !== null) {
       console.log("Something went wrong deleting the task", err)
       response.send(500)
     } else {
-    response.send ("Item Deleted")}
+      response.send("Item Deleted")
+    }
   })
 })
 
